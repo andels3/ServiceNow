@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload unload_date="2026-01-16 00:11:35">
+<sys_script_include action="INSERT_OR_UPDATE">
+<access>public</access>
+<active>true</active>
+<api_name>global.UserInGroupCheck3</api_name>
+<caller_access/>
+<client_callable>true</client_callable>
+<description/>
+<mobile_callable>false</mobile_callable>
+<name>UserInGroupCheck3</name>
+<sandbox_callable>false</sandbox_callable>
+<script><![CDATA[var UserInGroupCheck3 = Class.create();
+UserInGroupCheck3.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+	
+    // queries the Group table for selected group & check if they're a member of the group in sys_user_grmember table
+    checkUserInGroup: function() {		
+
+		var roleLabel = this.getParameter('sysparm_roleLabel');
+		var userSysId = this.getParameter('sysparm_userSysId');
+
+        // finding sys_id of group
+        var gr = new GlideRecord('sys_user_group');
+        gr.addQuery('name', roleLabel);
+        gr.query();
+
+        if (gr.next()) {
+			// assign sys_id to roleSysId
+            var roleSysId = gr.getValue('sys_id');
+
+            // use roleSysId and user to find if a matching record exists
+            var grMember = new GlideRecord('sys_user_grmember');
+            grMember.addQuery('group', roleSysId);
+            grMember.addQuery('user', userSysId);
+            grMember.query();
+
+			if (grMember.next()) {
+				// user is in group
+				gs.info("Is a member is returning true");
+                return 'true';
+            } else {
+				// user is not in group
+				gs.info("Is a member is returning false");
+				return 'false';
+			}
+        } else {
+			return 'Group doesn\'t exist or is inactive.';
+		}
+    },
+
+    type: 'UserInGroupCheck3'
+});]]></script>
+<sys_class_name>sys_script_include</sys_class_name>
+<sys_created_by>Andrew Else</sys_created_by>
+<sys_created_on>2025-09-09 19:14:34</sys_created_on>
+<sys_id>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</sys_id>
+<sys_mod_count>24</sys_mod_count>
+<sys_name>UserInGroupCheck3</sys_name>
+<sys_package display_value="Global" source="global">global</sys_package>
+<sys_policy/>
+<sys_scope display_value="Global">global</sys_scope>
+<sys_update_name>sys_script_include_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</sys_update_name>
+<sys_updated_by>Andrew Else</sys_updated_by>
+<sys_updated_on>2025-09-11 17:15:07</sys_updated_on>
+</sys_script_include>
+</unload>

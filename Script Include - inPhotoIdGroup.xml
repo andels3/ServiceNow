@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload unload_date="2026-01-16 00:12:43">
+<sys_script_include action="INSERT_OR_UPDATE">
+<access>public</access>
+<active>true</active>
+<api_name>global.inPhotoIdGroup</api_name>
+<caller_access/>
+<client_callable>true</client_callable>
+<description/>
+<mobile_callable>false</mobile_callable>
+<name>inPhotoIdGroup</name>
+<sandbox_callable>false</sandbox_callable>
+<script><![CDATA[var inPhotoIdGroup = Class.create();
+inPhotoIdGroup.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+	
+
+    // queries the Group table for selected group & check if they're a member of the group in sys_user_grmember table
+    checkUserInGroup: function() {		
+
+		var roleLabel = this.getParameter('sysparm_roleLabel');
+		var userSysId = this.getParameter('sysparm_userSysId');
+
+		gs.log("roleSysId: " + this.getParameter('sysparm_roleLabel'));
+		gs.log("userSysId: " + this.getParameter('sysparm_userSysId'));
+
+        // finding sys_id of group
+        var gr = new GlideRecord('sys_user_group');
+        gr.addQuery('name', roleLabel);
+        gr.query();
+
+        if (gr.next()) {
+			// assign sys_id to roleSysId
+            var roleSysId = gr.getValue('sys_id');			
+
+            // use roleSysId and user to find if a matching record exists
+            var grMember = new GlideRecord('sys_user_grmember');
+            grMember.addQuery('group', roleSysId);
+            grMember.addQuery('user', userSysId);
+            grMember.query();
+
+
+			if (grMember.next()) {
+				gs.log("User is in group");
+                return 'dis user IS IN group';
+            } else {
+				gs.log("User is not in group");
+				return 'dis user is NOT in group';
+			}
+        } else {
+			return 'Group doesn\'t exist';
+		}
+    },
+
+    type: 'inPhotoIdGroup'
+});]]></script>
+<sys_class_name>sys_script_include</sys_class_name>
+<sys_created_by>Andrew Else</sys_created_by>
+<sys_created_on>2025-09-09 19:13:40</sys_created_on>
+<sys_id>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_name>inPhotoIdGroup</sys_name>
+<sys_package display_value="Global" source="global">global</sys_package>
+<sys_policy/>
+<sys_scope display_value="Global">global</sys_scope>
+<sys_update_name>sys_script_include_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</sys_update_name>
+<sys_updated_by>Andrew Else</sys_updated_by>
+<sys_updated_on>2025-09-09 19:13:40</sys_updated_on>
+</sys_script_include>
+</unload>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload unload_date="2026-05-11 21:46:10">
+<sys_script_include action="INSERT_OR_UPDATE">
+<access>package_private</access>
+<active>true</active>
+<api_name>global.SelectSubordinateUsers</api_name>
+<caller_access/>
+<client_callable>true</client_callable>
+<description/>
+<mobile_callable>false</mobile_callable>
+<name>SelectSubordinateUsers</name>
+<sandbox_callable>false</sandbox_callable>
+<script><![CDATA[var SelectSubordinateUsers = Class.create();
+SelectSubordinateUsers.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+    loadSubordinates: function(managerID) {
+
+		var subordinates = '';
+
+		if (managerID == null){
+			subordinates += this.getParameter('sysparm_managerID');
+		} else {
+			subordinates += managerID;
+		}
+
+        //var subordinates = this.getParameter('sysparm_managerID');
+        var gr = new GlideRecord("sys_user");
+        gr.addQuery("manager", managerID);
+		gr.addQuery("active", true);
+        gr.query();
+		
+        while (gr.next()) {
+            subordinates += ',' + gr.sys_id;
+        }
+
+        return 'active=true^sys_idIN' + subordinates;
+    },
+
+    type: 'SelectSubordinateUsers'
+});]]></script>
+<sys_class_name>sys_script_include</sys_class_name>
+<sys_created_by>mehdi.akbari</sys_created_by>
+<sys_created_on>2026-03-12 15:53:35</sys_created_on>
+<sys_id>3f383b821bab7e1032d4ca26604bcbb6</sys_id>
+<sys_mod_count>8</sys_mod_count>
+<sys_name>SelectSubordinateUsers</sys_name>
+<sys_package display_value="Global" source="global">global</sys_package>
+<sys_policy/>
+<sys_scope display_value="Global">global</sys_scope>
+<sys_update_name>sys_script_include_3f383b821bab7e1032d4ca26604bcbb6</sys_update_name>
+<sys_updated_by>andrew.else</sys_updated_by>
+<sys_updated_on>2026-04-01 17:46:38</sys_updated_on>
+</sys_script_include>
+</unload>

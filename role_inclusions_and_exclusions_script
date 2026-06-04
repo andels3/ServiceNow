@@ -1,0 +1,96 @@
+// This script makes finding users for role-based testing a breeze. If you want
+// to find users who have a certain role but NOT another role, this script allows
+// you to easily do that. Simply add the sys_user_role.name string in the 
+// respective arrays and run the script. Optionally change the integer for maxUsers
+// to customize how many users you want returned.
+
+var hasRole = [
+	// strings of the names of roles you want the users to have
+	
+];
+
+var notRole = [
+	// strings of the names of roles you DO NOT want the users to have
+	
+];
+
+// replace 10 with the max number of users you want returned
+var maxUsers = 10;
+
+var excludedUsers = {};
+
+if (notRole.length > 0) {
+    var grExclude = new GlideRecord('sys_user_has_role');
+    grExclude.addQuery('role.name', 'IN', notRole.join(','));
+    grExclude.query();
+
+    while (grExclude.next()) {
+        excludedUsers[grExclude.getValue('user')] = true;
+    }
+}
+
+var users = [];
+
+if (hasRole.length > 0) {
+
+    // Users must have all roles in hasRole
+    var ga = new GlideAggregate('sys_user_has_role');
+    ga.addQuery('role.name', 'IN', hasRole.join(','));
+    ga.addQuery('user.active', true);
+    ga.groupBy('user');
+    ga.addAggregate('COUNT', 'role');
+    ga.query();
+
+    while (ga.next()) {
+        var userId = ga.getValue('user');
+
+        if (excludedUsers[userId]) {
+            continue;
+        }
+
+        var count = parseInt(ga.getAggregate('COUNT', 'role'), 10);
+
+        if (count === hasRole.length) {
+            users.push(userId);
+        }
+    }
+
+} else {
+	// no required roles; return all active users except excluded ones
+    var grUser = new GlideRecord('sys_user');
+    grUser.addActiveQuery();
+    grUser.query();
+
+    while (grUser.next()) {
+        var userId = grUser.getUniqueValue();
+
+        if (excludedUsers[userId]) {
+            continue;
+        }
+
+        users.push(userId);
+    }
+}
+
+if (users.length === 0) {
+    gs.info('No users available to pick from');
+} else {
+
+    var randomUsers = [];
+    var maxIterations = Math.min(maxUsers, users.length);
+
+    for (var i = 0; i < maxIterations; i++) {
+        var randomIndex = Math.floor(Math.random() * users.length);
+        randomUsers.push(users[randomIndex]);
+        users.splice(randomIndex, 1);
+    }
+
+    var gr = new GlideRecord('sys_user');
+    gr.addQuery('sys_id', 'IN', randomUsers.join(','));
+    gr.query();
+
+    while (gr.next()) {
+        gs.info(gr.getValue('user_name'));
+        gs.info(" ⤷(" + gr.getValue('sys_id') + ")");
+    }
+}
